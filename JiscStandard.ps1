@@ -36,6 +36,9 @@ foreach ($e in $hols."$(($hols | Get-Member -MemberType NoteProperty)[$opt].Name
     $DateRanges += New-CsOnlineDateTimeRange -Start $d -End ($d.addDays(1))
 }
 
+#Add Additional dates to the Date Range
+#$DateRanges += New-CsOnlineDateTimeRange -Start "dd/mm/yyyy" -End "dd+1/mm/yyyy"
+
 $HolidayDef = New-CsOnlineSchedule -Name "UK Bank Holidays" -FixedSchedule -DateTimeRanges $DateRanges
 
 
