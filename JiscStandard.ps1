@@ -82,6 +82,10 @@ Set-CsTeamsEmergencyCallRoutingPolicy -Identity Global -AllowEnhancedEmergencySe
 
 Write-Host "Creating normalization rules"
 $NR = @()
+#if you want a local normalizations
+#$NR += New-CsVoiceNormalizationRule -Name "UK-Bristol-Local" -Parent $DPParent -Pattern '^(([234]\d\d|9[0-8]\d|99[0-8])\d{4})$' -Translation '+44117$1' -InMemory -Description "Local number normalization for Bristol, United Kingdom"
+#$NR += New-CsVoiceNormalizationRule -Name "UK-Cardiff-Local" -Parent $DPParent -Pattern '^(2[0-3]\d{6})$' -Translation '+4429$1' -InMemory -Description "Local number normalization for Cardiff, United Kingdom"
+#$NR += New-CsVoiceNormalizationRule -Name "UK-Bath-Local" -Parent $DPParent -Pattern '^(([2-8]\d\d|9[0-8]\d|99[0-8])\d{3})$' -Translation '+441225$1' -InMemory -Description "Local number normalization for Bath, United Kingdom"
 $NR += New-CsVoiceNormalizationRule -Name "UK-Non-Geographic-Local" -Parent $DPParent -Pattern '^(([2-8]\d\d|9[0-8]\d|99[0-8])\d{1,5})$' -Translation '+443$1' -InMemory -Description "Local number normalization for Non-Geographic, United Kingdom"
 $NR += New-CsVoiceNormalizationRule -Name 'UK-TollFree' -Parent $DPParent -Pattern '^0((80(0\d{6,7}|8\d{7}|01111)|500\d{6}))\d*$' -Translation '+44$1' -InMemory -Description "TollFree number normalization for United Kingdom"
 $NR += New-CsVoiceNormalizationRule -Name 'UK-Premium' -Parent $DPParent -Pattern '^0((9[018]\d|87[123]|70\d)\d{7})$' -Translation '+44$1' -InMemory -Description "Premium number normalization for United Kingdom"
@@ -90,6 +94,8 @@ $NR += New-CsVoiceNormalizationRule -Name 'UK-National' -Parent $DPParent -Patte
 $NR += New-CsVoiceNormalizationRule -Name 'UK-Service' -Parent $DPParent -Pattern '^(1(47\d|70\d|800\d|1[68]\d{3}|\d\d)|999|[\*\#][\*\#\d]*\#)$' -Translation '$1' -InMemory -Description "Service number normalization for United Kingdom"
 $NR += New-CsVoiceNormalizationRule -Name 'UK-International' -Parent $DPParent -Pattern '^(?:\+|00)(1|7|2[07]|3[0-46]|39\d|4[013-9]|5[1-8]|6[0-6]|8[1246]|9[0-58]|2[1235689]\d|24[013-9]|242\d|3[578]\d|42\d|5[09]\d|6[789]\d|8[035789]\d|9[679]\d)(?:0)?(\d{5,14})(\D+\d+)?$' -Translation '+$1$2' -InMemory -Description "International number normalization for United Kingdom"
 
+
+#If you are in a multi site setup you may want to create multiple dial plans for each site with different local normalization rules, by default adjust the Global with the UK generics
 Set-CsTenantDialPlan -Identity Global -NormalizationRules @{add=$NR} -Description "Policy updated to include UK normalization rules."
 
 #endregion
