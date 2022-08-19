@@ -18,7 +18,7 @@ Modified by Nick
 
 Connect-MicrosoftTeams
 
-$question = $host.UI.PromptForChoice("Choose Region", "What type?", ([System.Management.Automation.Host.ChoiceDescription]"&Holidays only",[System.Management.Automation.Host.ChoiceDescription]"&Full"), 0)
+$question = $host.UI.PromptForChoice("What type?", "Select the type of script run this is", ([System.Management.Automation.Host.ChoiceDescription]"&Holidays only",[System.Management.Automation.Host.ChoiceDescription]"&Full"), 0)
 
 #region:1. Create bank holiday definition
 #download from gov.uk
@@ -39,9 +39,18 @@ foreach ($e in $hols."$(($hols | Get-Member -MemberType NoteProperty)[$opt].Name
 
 #Add Additional dates to the Date Range
 #$DateRanges += New-CsOnlineDateTimeRange -Start "dd/mm/yyyy" -End "dd+1/mm/yyyy"
+$HolidayDef = Get-CsOnlineSchedule | ? Name -eq "UK Bank Holidays"
 
-$HolidayDef = New-CsOnlineSchedule -Name "UK Bank Holidays" -FixedSchedule -DateTimeRanges $DateRanges
+if ($HolidayDef -eq $null) {
+    Write-Host "Creating Schedule"
+    $HolidayDef = New-CsOnlineSchedule -Name "UK Bank Holidays" -FixedSchedule -DateTimeRanges $DateRanges
+} else {
+    Write-Host "Updating Schedule"
+    $DateRanges += $DateRanges
+    Set-CsOnlineSchedule -Instance $HolidayDef
+}
 
+#Following section will only run if a full run is 
 if ($question -gt 0) {
 #endregion
 
