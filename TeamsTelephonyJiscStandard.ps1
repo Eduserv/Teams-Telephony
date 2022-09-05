@@ -163,7 +163,9 @@ The default "Global" policy is configured for UserSignIn and will allow user to 
     Set-CsOnlineVoiceRoutingPolicy -Identity "Premium plus International Routing" -OnlinePstnUsages @{Add=$PremiumPlusRoutingUsages}
 
 
+
     $CustomerSBCAddress = Read-Host "Enter the customer SBC FQDN (example: jsl.sbc.jisc.ac.uk)"
+
     if ($CustomerSBCAddress -ne "") {
         Write-Host "Creating voice routes"
         New-CsOnlineVoiceRoute -Name "UK-Non-Geographic-Local" -Priority 1 -OnlinePstnUsages "UK-Non-Geographic-Local" -OnlinePstnGatewayList $CustomerSBCAddress -NumberPattern '^\+440?3(([2-8]\d\d|9[0-8]\d|99[0-8])\d{1,5})' -Description "Local routing for Non-Geographic, United Kingdom" | Out-Null
