@@ -87,9 +87,9 @@ foreach ($User in $provisioningAccounts) {
 
 $completedSBC = $false
 
+Set-CsOnlinePSTNUsage -Identity Global -Usage @{add="UnrestrictedPstnUsage"}
 while (!$completedSBC) {
     $voicerouteerror = $null
-    Set-CsOnlinePSTNUsage -Identity Global -Usage @{add="UnrestrictedPstnUsage"}
     New-CsOnlineVoiceRoute -Identity "UnrestrictedPstnUsage" -NumberPattern ".*" -OnlinePstnGatewayList $CustFQDN -OnlinePstnUsages "UnrestrictedPstnUsage" -ErrorAction Continue -ErrorVariable voicerouteerror
     if ($voicerouteerror -ilike "*Cannot find specified Gateway*") {
         Write-Host "Gateway initialization in progress, we will retry in 5 minutes"

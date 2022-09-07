@@ -14,11 +14,10 @@ Modified by Nick
     Premium Plus International Routing
 
 #>
-#Requires MicrosoftTeams
 
 Connect-MicrosoftTeams
 
-$question = $host.UI.PromptForChoice("What type?", "Select the type of script run this is", ([System.Management.Automation.Host.ChoiceDescription]"&Holidays only",[System.Management.Automation.Host.ChoiceDescription]"&Full"), 0)
+$question = $host.UI.PromptForChoice("What type?", "Select the type of script run this is", ([System.Management.Automation.Host.ChoiceDescription]"&Holidays only",  [System.Management.Automation.Host.ChoiceDescription]"&Full"), 0)
 
 #region:1. Create bank holiday definition
 #download from gov.uk
