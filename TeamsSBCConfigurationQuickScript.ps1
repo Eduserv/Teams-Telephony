@@ -17,10 +17,13 @@ do {
     }
 } while ($number -ne "")
 
-$skuId = "0e142028-345e-45da-8d92-8bfd4093bbb9"
 $Location = "GB"
 $symbols = '!@#$%^&*'.ToCharArray()
 $characterList = 'a'..'z' + 'A'..'Z' + '0'..'9' + $symbols
+
+$skus = Get-MgSubscribedSku -Select Id,skuPartNumber
+
+$sku = $skus | ? { $_.SkuPartNumber -eq "PHONESYSTEM_VIRTUALUSER_FACULTY" }
 
 
 do {
@@ -38,8 +41,7 @@ $CustFQDN = Read-Host "Customer SBC FQDN (fhc.sbc.jisc.ac.uk): "
 
 #Provsioning accounts to be created first
 $provisioningAccounts = @(
-"voice.test1@$CustFQDN"
-"voice.test2@$CustFQDN"
+"sbcinit@$CustFQDN"
 )
 
 #endregion
@@ -60,11 +62,19 @@ $PasswordProfile = @{
     Password = $password
 }
 
-foreach ($User in $provisioningAccounts){
+$question = $host.UI.PromptForChoice("Has Teams Resource Account Licenses (free) been procured?", "Resource account licenses are used on the SBC init account", ([System.Management.Automation.Host.ChoiceDescription]"&Yes",[System.Management.Automation.Host.ChoiceDescription]"&No"), 0)
+
+if ($question -gt 0 -or !$sku -or $sku.length -eq 0) {
+    throw "Please ensure a Teams Resource Account License is available before continuing"
+}
+
+Write-Host "Creating SBC Provisioning Accounts"
+
+foreach ($User in $provisioningAccounts) {
     Get-MgUser -UserId $User -OutVariable $usertest -ErrorAction SilentlyContinue
     if (!$usertest) {
         New-MgUser -OutVariable account -AccountEnabled:$true -Department "SBC Provisionig Account" -UserPrincipalName $User -PasswordProfile $PasswordProfile -UsageLocation $Location
-        Start-Sleep -s 3
+        Start-Sleep -s 5
         Set-MgUserLicense -UserId $account.Id -AddLicenses @(@{ SkuId = $skuId } ) -RemoveLicenses @()
     } else {
         Write-host "Found user: $User" -ForegroundColor Green
@@ -73,18 +83,23 @@ foreach ($User in $provisioningAccounts){
 
 #endregion
 
-
 #region:2. Configure Teams with basic config
 
-Set-CsOnlinePSTNUsage -Identity Global -Usage @{add="UnrestrictedPstnUsage"}
-try {
-    New-CsOnlineVoiceRoute -Identity "UnrestrictedPstnUsage" -NumberPattern ".*" -OnlinePstnGatewayList $CustFQDN -OnlinePstnUsages "UnrestrictedPstnUsage" -erroraction stop
-}
-catch {
-    $Error[0]
-    Write-Host "If this command has failed with error: Cannot find specified gateway $CustFQDN then please ensure `
-that a user with enterprise voice enabled has their primary SIP address aligned with this domain. If this has `
-already been completed then you may have to wait for the service to be enabled by MS" -ForegroundColor yellow
+$completedSBC = $false
+
+while (!$completedSBC) {
+    $voicerouteerror = $null
+    Set-CsOnlinePSTNUsage -Identity Global -Usage @{add="UnrestrictedPstnUsage"}
+    New-CsOnlineVoiceRoute -Identity "UnrestrictedPstnUsage" -NumberPattern ".*" -OnlinePstnGatewayList $CustFQDN -OnlinePstnUsages "UnrestrictedPstnUsage" -ErrorAction Continue -ErrorVariable voicerouteerror
+    if ($voicerouteerror -ilike "*Cannot find specified Gateway*") {
+        Write-Host "Gateway initialization in progress, we will retry in 5 minutes"
+        foreach ($i in 0..300) {
+            $timeleft = ([timespan]::fromSeconds(300 - $i)).toString()
+            Write-Progress -Activity "Waiting for SBC Gateway - recheck in $timeleft" -SecondsRemaining (300 - $i) -PercentComplete ($i / 300 * 100)
+            Start-Sleep -s 1
+        }
+    }
+    $completed = (!$voicerouteerror)
 }
 
 New-CsOnlineVoiceRoute -Identity "UnrestrictedPstnUsage" -NumberPattern ".*" -OnlinePstnGatewayList $CustFQDN -OnlinePstnUsages "UnrestrictedPstnUsage"
@@ -98,11 +113,10 @@ foreach ($User in $provisioningAccounts) {
    
     #Enable users for enterprise voice
 
-    if ($(Get-CsOnlineVoiceUser -Identity $user).enterprisevoiceenabled -ne "True"){
+    if ($(Get-CsOnlineVoiceUser -Identity $user).enterprisevoiceenabled -ne "True") {
         Write-Host "Enabling user: $user for ent voice" -ForegroundColor yellow
         Set-CsPhoneNumberAssignment -Identity $user -EnterpriseVoiceEnabled $true
-    }
-    else{
+    } else {
         Write-Host "User: $user already has ent voice enabled" -ForegroundColor Green
     }
 
@@ -112,19 +126,9 @@ foreach ($User in $provisioningAccounts) {
 
 #assign the 2 testing numbers to the accounts
 
+Write-Host "Assigning $($TestNumbers[0]) to $($provisioningAccounts[0])"
 Set-CsPhoneNumberAssignment -Identity $provisioningAccounts[0] -PhoneNumber $TestNumbers[0] -PhoneNumberType DirectRouting
-Set-CsPhoneNumberAssignment -Identity $provisioningAccounts[1] -PhoneNumber $TestNumbers[1] -PhoneNumberType DirectRouting
 
-#endregion
-
-
-#region:4. Remove numbers
-
-#Remove test numbers from the provisioning accounts after testing for assignment to other users
-
-foreach ($number in $TestNumbers) {
-    $targetID = get-csonlineuser $(Get-CsPhoneNumberAssignment -NumberType directrouting -TelephoneNumber $number).AssignedPstnTargetId
-    if ($targetID) { Remove-CsPhoneNumberAssignment -Identity $($targetID.UserPrincipalName) -RemoveAll }
-}
+Write-Host "Assign $(TestNumbers[0]) to another account via the Teams Admin Portal"
 
 #endregion
