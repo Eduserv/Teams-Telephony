@@ -81,6 +81,14 @@ foreach ($User in $provisioningAccounts) {
     }
 }
 
+Write-Host "Waiting for sync service"
+foreach ($i in 0..29) {
+    Write-Progress -Activity "Sleeping for $(30-$i) seconds" -PercentComplete ($i/30 * 100) -SecondsRemaining (30-$i)
+    Start-Sleep -s 1
+}
+
+Get-CsTenant | Select DomainUrlMap
+
 #endregion
 
 #region:2. Configure Teams with basic config
@@ -129,6 +137,6 @@ foreach ($User in $provisioningAccounts) {
 Write-Host "Assigning $($TestNumbers[0]) to $($provisioningAccounts[0])"
 Set-CsPhoneNumberAssignment -Identity $provisioningAccounts[0] -PhoneNumber $TestNumbers[0] -PhoneNumberType DirectRouting
 
-Write-Host "Assign $(TestNumbers[0]) to another account via the Teams Admin Portal"
+Write-Host "Assign $(TestNumbers[1]) to another account via the Teams Admin Portal"
 
 #endregion
