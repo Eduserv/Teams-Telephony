@@ -14,16 +14,15 @@ Jisc standard teams telephony delivery currently includes the following elements
 
 #>
 
-#Requires -RunAsAdministrator
-
 #region:check and install required modules if required
 Write-Host "Checking that prerequisite modules are installed - please wait."
+
 $Module = Get-Module -ListAvailable 
 if (! $($Module | Where-Object -property name -like "microsoftteams*")) {
   Write-Host "MS Teams module is not available" -ForegroundColor yellow
   $Confirm = Read-Host Are you sure you want to install module? [Y] Yes [N] No
   if ($Confirm -match "[yY]") {
-    Install-Module -Name MicrosoftTeams -force
+    Install-Module -Name MicrosoftTeams -scope CurrentUser
   }
   else {
     Write-Host "MS Teams module is required. Please install module using Install-Module MicrosoftTeams cmdlet."
@@ -99,6 +98,8 @@ Set-CsTeamsEmergencyCallRoutingPolicy -Identity Global -AllowEnhancedEmergencySe
 
 #region:3. UK normalization rules - add to standard global dial plan
 
+$DPParent = "Global"
+
 Write-Host "Creating normalization rules"
 $NR = @()
 $NR += New-CsVoiceNormalizationRule -Name "UK-Non-Geographic-Local" -Parent $DPParent -Pattern '^(([2-8]\d\d|9[0-8]\d|99[0-8])\d{1,5})$' -Translation '+443$1' -InMemory -Description "Local number normalization for Non-Geographic, United Kingdom"
@@ -121,6 +122,8 @@ Write-Host 'Creating voice policies'
 New-CsOnlineVoiceRoutingPolicy "Standard Routing" -Description "Allows UK calls excluding premium rate numbers" -WarningAction:SilentlyContinue | Out-Null
 New-CsOnlineVoiceRoutingPolicy "Premium Routing" -Description "Allows UK calls including premium rate numbers" -WarningAction:SilentlyContinue | Out-Null
 New-CsOnlineVoiceRoutingPolicy "Premium plus International Routing" -Description "Allows all call and includes international calls" -WarningAction:SilentlyContinue | Out-Null
+New-CsOnlineVoiceRoutingPolicy "Standard plus International Routing" -Description "Allows standard call and includes international calls" -WarningAction:SilentlyContinue | Out-Null
+
 
 #Create PSTN Usages
 
@@ -142,7 +145,7 @@ $PremiumRoutingUsages = "UK-Non-Geographic-Local","UK-Non-Geographic-Service","U
 $PremiumPlusRoutingUsages = "UK-Non-Geographic-Local","UK-Non-Geographic-Service","UK-Non-Geographic-National","UK-Non-Geographic-Mobile","UK-Non-Geographic-Premium","UK-Non-Geographic-International"
 
 Set-CsOnlineVoiceRoutingPolicy -Identity "Standard Routing" -OnlinePstnUsages @{Add=$StandardRoutingUsages}
-Set-CsOnlineVoiceRoutingPolicy -Identity "Standard Routing plus International Routing" -OnlinePstnUsages @{Add=$StandardPlusIntRoutingUsages}
+Set-CsOnlineVoiceRoutingPolicy -Identity "Standard plus International Routing" -OnlinePstnUsages @{Add=$StandardPlusIntRoutingUsages}
 Set-CsOnlineVoiceRoutingPolicy -Identity "Premium Routing" -OnlinePstnUsages @{Add=$PremiumRoutingUsages}
 Set-CsOnlineVoiceRoutingPolicy -Identity "Premium plus International Routing"  -OnlinePstnUsages @{Add=$PremiumPlusRoutingUsages}
 
