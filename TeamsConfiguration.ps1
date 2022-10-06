@@ -57,6 +57,9 @@ Function Add-License {
 		    [Parameter(Mandatory)]
 		    [string]$SkuID,
 
+            #[Parameter(Mandatory)]
+		    #[string]$Group,
+
             [Parameter(Mandatory)]
 		    [string]$TargetUPN,
 
@@ -76,6 +79,9 @@ Function Add-License {
             return
         }
 
+        #Add user to AD group or add license direct
+        #AD group add here please
+
         #$confirmation = Read-host "Would you like to try and add a license (Licenses are ideally added using AAD groups)? (Y/N)"
         $confirmation = "y" #remove this if the above line is uncommented
         if ($confirmation -eq 'y') {
@@ -88,7 +94,6 @@ Function Add-License {
             Set-AzureADUser -ObjectID $($ADUserObject.ObjectId) -UsageLocation $Location
             Set-AzureADUserLicense -ObjectId $($ADUserObject.ObjectId) -AssignedLicenses $LicensesToAssign
             Write-Host "Licence applied for: $TargetUPN" -ForegroundColor yellow
- 
         } 
 }
 
