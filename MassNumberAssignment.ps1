@@ -31,8 +31,10 @@ if ($OpenFileDialog.ShowDialog() -eq "OK") {
     $i = 0
     foreach ($a in $csv) {
         $i++;
-        Write-Progress -Activity "$i / $($csv.Count) Assigning $($a."$upn") $($a."$phone")" -PercentComplete ($i/$csv.Count * 100)
-        Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -LocationId $a."$location" -PhoneNumberType DirectRouting
+        if ($a."$upn" -ne "") {
+            Write-Progress -Activity "$i / $($csv.Count) Assigning $($a."$upn") $($a."$phone")" -PercentComplete ($i/$csv.Count * 100)
+            Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -LocationId $a."$location" -PhoneNumberType DirectRouting
+        }
     }
 
 } else {
