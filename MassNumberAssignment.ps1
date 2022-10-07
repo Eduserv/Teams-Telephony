@@ -4,7 +4,7 @@ Mass Assigns Numbers
 Modified by Nick
 
 #>
-
+Start-Transcript
 Write-Host "This script will first get a list of location IDs, please use this in the csv file LocationID field"
 
 Connect-MicrosoftTeams
@@ -40,3 +40,4 @@ if ($OpenFileDialog.ShowDialog() -eq "OK") {
 } else {
     throw "Mass Numbers CSV file open dialog cancelled"
 }
+Stop-Transcript
