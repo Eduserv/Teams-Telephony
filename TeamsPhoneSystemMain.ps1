@@ -122,7 +122,7 @@ The default "Global" policy is configured for UserSignIn and will allow user to 
 #>
     Write-Host "Creating Common Area Phone Policies"
     New-CsTeamsIPPhonePolicy -Identity "CommonAreaPhone" -Description "Common Area Phone User Policy" -SignInMode CommonAreaPhoneSignIn -AllowHotDesking:$false
-    New-CsTeamsIPPhonePolicy -Identity "CommonAreaPhone-Secure" -Description "Common Area Phone User Policy without Directory Search" -SignInMode CommonAreaPhoneSignIn -AllowHotDesking:$false -SearchOnCommonAreaPhoneMode 'Disabled'
+    New-CsTeamsIPPhonePolicy -Identity "CommonAreaPhone-Secure" -Description "Common Area Phone User Policy without Directory Search" -SignInMode CommonAreaPhoneSignIn -AllowHotDesking 'Disabled' -SearchOnCommonAreaPhoneMode 'Disabled' -AllowHomeScreen 'Disabled'
     #New-CsTeamsIPPhonePolicy -Identity "UserPhone" -Description "IP Phone User Policy - Allow Hot Desking" -SignInMode usersignin -AllowHotDesking:$True -AllowBetterTogether #this is really a mirror of the global policy so maybe dont create?
 
 #endregion
