@@ -15,6 +15,12 @@ Modified by Nick
 
 #>
 
+try { 
+    Get-InstalledModule MicrosoftTeams -ErrorAction Stop
+} catch { 
+    Install-Module MicrosoftTeams
+}
+
 Connect-MicrosoftTeams
 
 $question = $host.UI.PromptForChoice("What type?", "Select the type of script run this is", ([System.Management.Automation.Host.ChoiceDescription]"&Holidays only",  [System.Management.Automation.Host.ChoiceDescription]"&Full"), 0)
