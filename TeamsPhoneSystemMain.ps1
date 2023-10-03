@@ -18,7 +18,7 @@ Modified by Nick
 try { 
     Get-InstalledModule MicrosoftTeams -ErrorAction Stop
 } catch { 
-    Install-Module MicrosoftTeams
+    Install-Module MicrosoftTeams -Scope CurrentUser
 }
 
 Connect-MicrosoftTeams
