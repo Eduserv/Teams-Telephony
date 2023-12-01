@@ -4,6 +4,18 @@ Jisc SBC baseline setup for testing.
 
 #region:variables
 
+try { 
+    Get-InstalledModule MicrosoftTeams -ErrorAction Stop
+} catch { 
+    Install-Module MicrosoftTeams -Scope CurrentUser
+}
+
+try { 
+    Get-InstalledModule Microsoft.Graph -ErrorAction Stop
+} catch { 
+    Install-Module Microsoft.graph -Scope CurrentUser
+}
+
 Write-Host "Please enter the test numbers"
 $number = ""
 $i = 0
