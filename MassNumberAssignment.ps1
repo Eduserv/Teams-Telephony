@@ -33,7 +33,12 @@ if ($OpenFileDialog.ShowDialog() -eq "OK") {
         $i++;
         if ($a."$upn" -ne "") {
             Write-Progress -Activity "$i / $($csv.Count) Assigning $($a."$upn") $($a."$phone")" -PercentComplete ($i/$csv.Count * 100)
-            Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -LocationId $a."$location" -PhoneNumberType DirectRouting
+            try {
+                Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -LocationId $a."$location" -PhoneNumberType DirectRouting -ErrorAction Stop
+            } catch {
+                Write-Error "Error setting phone number on $($a."$upn")"
+                Write-Error $_
+            }
         }
     }
 
