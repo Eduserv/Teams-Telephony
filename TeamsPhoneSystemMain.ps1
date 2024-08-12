@@ -129,7 +129,7 @@ The default "Global" policy is configured for UserSignIn and will allow user to 
     Write-Host "Creating Common Area Phone Policies"
     New-CsTeamsIPPhonePolicy -Identity "CommonAreaPhone" -Description "Common Area Phone User Policy" -SignInMode CommonAreaPhoneSignIn -AllowHotDesking:$false
     New-CsTeamsIPPhonePolicy -Identity "CommonAreaPhone-Secure" -Description "Common Area Phone User Policy without Directory Search" -SignInMode CommonAreaPhoneSignIn -AllowHotDesking:$false -SearchOnCommonAreaPhoneMode 'Disabled' -AllowHomeScreen 'Disabled'
-    New-CsTeamsIPPhonePolicy -Identity "UserPhone" -Description "IP Phone User Policy - Allow Hot Desking" -SignInMode usersignin -AllowHotDesking:$True -AllowBetterTogether #this is really a mirror of the global policy so maybe dont create?
+    New-CsTeamsIPPhonePolicy -Identity "UserPhone" -Description "IP Phone User Policy - Allow Hot Desking" -SignInMode usersignin -AllowHotDesking:$True -AllowBetterTogether 'Enabled'
 
 #endregion
 
@@ -163,6 +163,7 @@ The default "Global" policy is configured for UserSignIn and will allow user to 
     $PremiumPlusRoutingUsages = "UK-Non-Geographic-Local","UK-Non-Geographic-Service","UK-Non-Geographic-National","UK-Non-Geographic-Mobile","UK-Non-Geographic-Premium","UK-Non-Geographic-International"
 
     Set-CsOnlineVoiceRoutingPolicy -Identity "Standard Routing" -OnlinePstnUsages @{Add=$StandardRoutingUsages}
+    Set-CsOnlineVoiceRoutingPolicy -Identity Global -OnlinePstnUsages @{Add=$StandardRoutingUsages}
     Set-CsOnlineVoiceRoutingPolicy -Identity "Standard Routing plus International Routing" -OnlinePstnUsages @{Add=$StandardPlusIntRoutingUsages}
     Set-CsOnlineVoiceRoutingPolicy -Identity "Premium Routing" -OnlinePstnUsages @{Add=$PremiumRoutingUsages}
     Set-CsOnlineVoiceRoutingPolicy -Identity "Premium plus International Routing" -OnlinePstnUsages @{Add=$PremiumPlusRoutingUsages}
