@@ -23,7 +23,7 @@ $TestNumbers = @()
 
 do {
     $i++
-    Read-host "Number $i: (enter nothing to finish)" -OutVariable number
+    Read-host "Number $i : (enter nothing to finish)" -OutVariable number
     if ($number -ne "") {
         $TestNumbers += $number
     }
