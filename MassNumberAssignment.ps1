@@ -11,7 +11,7 @@ Connect-MicrosoftTeams
 
 Get-CsOnlineLisLocation | ft Description,LocationID
 
-Read-Host "Please complete the LocationID column in the CSV file, press any key to continue"
+Read-Host "Please complete the LocationID column in the CSV file, press enter to continue"
 
 [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
 $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
