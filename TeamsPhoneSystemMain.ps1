@@ -51,7 +51,7 @@ if ($HolidayDef -eq $null) {
     $HolidayDef = New-CsOnlineSchedule -Name "UK Bank Holidays" -FixedSchedule -DateTimeRanges $DateRanges
 } else {
     Write-Host "Updating Schedule"
-    $DateRanges += $DateRanges
+    $HolidayDef.FixedSchedule.DateTimeRanges += $DateRanges
     Set-CsOnlineSchedule -Instance $HolidayDef
 }
 
