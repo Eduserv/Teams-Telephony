@@ -12,7 +12,7 @@ Modified by Nick
     Standard Routing
     Premium Routing
     Premium Plus International Routing
-
+5. import number ranges
 #>
 
 try { 
@@ -114,9 +114,28 @@ Set-CsTeamsEmergencyCallRoutingPolicy -Identity Global -AllowEnhancedEmergencySe
     $NR += New-CsVoiceNormalizationRule -Name 'UK-Service' -Parent $DPParent -Pattern '^(1(47\d|70\d|800\d|1[68]\d{3}|\d\d)|999|[\*\#][\*\#\d]*\#)$' -Translation '$1' -InMemory -Description "Service number normalization for United Kingdom"
     $NR += New-CsVoiceNormalizationRule -Name 'UK-International' -Parent $DPParent -Pattern '^(?:\+|00)(1|7|2[07]|3[0-46]|39\d|4[013-9]|5[1-8]|6[0-6]|8[1246]|9[0-58]|2[1235689]\d|24[013-9]|242\d|3[578]\d|42\d|5[09]\d|6[789]\d|8[035789]\d|9[679]\d)(?:0)?(\d{5,14})(\D+\d+)?$' -Translation '+$1$2' -InMemory -Description "International number normalization for United Kingdom"
 
-
     #If you are in a multi site setup you may want to create multiple dial plans for each site with different local normalization rules, by default adjust the Global with the UK generics
     Set-CsTenantDialPlan -Identity Global -NormalizationRules @{add=$NR} -Description "Policy updated to include UK normalization rules."
+
+#endregion
+
+#region: Number range importing
+Write-Host "Please have your number ranges to hand"
+
+$morerangesopt = '&Yes','&No'
+do {
+    do {
+        $startnumber = Read-host "Enter the start of the range in E164 format (+44...)" -OutVariable startnumber
+    } while (($startnumber -match "^\+[1-9]\d{1,14}$") -eq $false)
+    do {
+        $endnumber = Read-host "Enter the end of the range in E164 format (+44...)" -OutVariable endnumber
+    } while (($endnumber -match "^\+[1-9]\d{1,14}$") -eq $false)
+    if ($startnumber -eq $endnumber) {
+        New-CsOnlineDirectRoutingTelephoneNumberUploadOrder -TelephoneNumber $startnumber
+    } else {
+        New-CsOnlineDirectRoutingTelephoneNumberUploadOrder -StartingNumber $startnumber -EndingNumber $endnumber
+    }
+} while (($host.UI.PromptForChoice("More Ranges", "Do you have more ranges to import?", $morerangesopt, 0) -eq 1))
 
 #endregion
 
