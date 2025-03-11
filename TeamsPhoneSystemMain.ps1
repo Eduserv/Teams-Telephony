@@ -135,7 +135,7 @@ do {
     } else {
         New-CsOnlineDirectRoutingTelephoneNumberUploadOrder -StartingNumber $startnumber -EndingNumber $endnumber
     }
-} while (($host.UI.PromptForChoice("More Ranges", "Do you have more ranges to import?", $morerangesopt, 0) -eq 1))
+} while (($host.UI.PromptForChoice("More Ranges", "Do you have more ranges to import?", $morerangesopt, 0) -eq 0))
 
 #endregion
 
