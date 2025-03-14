@@ -5,11 +5,9 @@ Modified by Nick
 
 #>
 Start-Transcript
-Write-Host "This script will first get a list of location IDs, please use this in the csv file LocationID field"
+Write-Host "Nick's Teams Phone mass number assignment script - please have your CSV file ready with UPN + Phone Number"
 
 Connect-MicrosoftTeams
-
-Get-CsOnlineLisLocation | ft Description,LocationID
 
 Read-Host "Please complete the LocationID column in the CSV file, press enter to continue"
 
@@ -26,7 +24,6 @@ if ($OpenFileDialog.ShowDialog() -eq "OK") {
     
     $upn = $options[($host.UI.PromptForChoice("UPN Column", "Select the column with the UPN/Email in", $options, 0))].Label -replace "&",""
     $phone = $options[($host.UI.PromptForChoice("Phone Number Column", "Select the column with the phone number/extension in", $options, 0))].Label -replace "&",""
-    $location = $options[($host.UI.PromptForChoice("LocationID Column", "Select the column with the location id in", $options, 0))].Label -replace "&",""
 
     $i = 0
     foreach ($a in $csv) {
@@ -34,7 +31,7 @@ if ($OpenFileDialog.ShowDialog() -eq "OK") {
         if ($a."$upn" -ne "") {
             Write-Progress -Activity "$i / $($csv.Count) Assigning $($a."$upn") $($a."$phone")" -PercentComplete ($i/$csv.Count * 100)
             try {
-                Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -LocationId $a."$location" -PhoneNumberType DirectRouting -ErrorAction Stop
+                Set-CsPhoneNumberAssignment -Identity $a."$upn" -PhoneNumber $a."$phone" -PhoneNumberType DirectRouting -ErrorAction Stop
             } catch {
                 Write-Error "Error setting phone number on $($a."$upn")"
                 Write-Error $_
